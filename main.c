@@ -1,106 +1,45 @@
-/**
-  ******************************************************************************
-  * @file    CAN/CAN_LoopBack/main.c 
-  * @author  MCD Application Team
-  * @version V1.1.0
-  * @date    18-January-2013
-  * @brief   Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; COPYRIGHT 2013 STMicroelectronics</center></h2>
-  *
-  * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
-  * You may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at:
-  *
-  *        http://www.st.com/software_license_agreement_liberty_v2
-  *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  *
-  ******************************************************************************
-  */
 
-/* Includes ------------------------------------------------------------------*/
-#include "main.h"
+#define HSE_VALUE ((uint32_t)8000000)
 
-/** @addtogroup STM32F4xx_StdPeriph_Examples
-  * @{
-  */
+#include "stm32f4xx_can.h"
+#include "stm32f4xx_conf.h"
+#include "stm32f4xx.h"
+#include "stm32f4xx_gpio.h"
+#include "stm32f4xx_rcc.h"
+#include "stm32f4xx_exti.h"
+#include "stm32f4xx_spi.h"
+#include "interrupts.h"
+#include "view.h"
 
-/** @addtogroup CAN_LoopBack
-  * @{
-  */ 
 
-/* Private define ------------------------------------------------------------*/
-/* Private typedef -----------------------------------------------------------*/
-typedef enum {FAILED = 0, PASSED = !FAILED} TestStatus;
 
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
-__IO uint32_t ret = 0; /* for return of the interrupt handling */
-volatile TestStatus TestRx;
 
-/* Private function prototypes -----------------------------------------------*/
-TestStatus CAN_Polling(void);
 
-/* Private functions ---------------------------------------------------------*/
+#define USE_CAN1
+/* #define USE_CAN2 */
 
-/**
-  * @brief  Main program.
-  * @param  None
-  * @retval None
-  */
-int main(void)
+#ifdef  USE_CAN1
+  #define CANx                       CAN1
+  #define CAN_CLK                    RCC_APB1Periph_CAN1
+#else /*USE_CAN2*/
+  #define CANx                       CAN2
+  #define CAN_CLK                    (RCC_APB1Periph_CAN1 | RCC_APB1Periph_CAN2)
+#endif  /* USE_CAN1 */
+
+
+
+
+void delay(uint32_t time)
 {
-  /*!< At this stage the microcontroller clock setting is already configured, 
-       this is done through SystemInit() function which is called from startup
-       files (startup_stm32f40xx.s/startup_stm32f427x.s) before to branch to 
-       application main. 
-       To reconfigure the default setting of SystemInit() function, refer to
-       system_stm32f4xx.c file
-     */    
-
-  /* CANx Periph clock enable */
-  RCC_APB1PeriphClockCmd(CAN_CLK, ENABLE);
-  
-  /* Configures LED 1,2 */
-  STM_EVAL_LEDInit(LED1);
-  STM_EVAL_LEDInit(LED2);
-
-  /* CAN transmit at 125Kb/s and receive by polling in loopback mode */
-  TestRx = CAN_Polling();
-
-  if (TestRx !=  FAILED)
-  { /* OK */
-
-    /* Turn on LED1 */
-    STM_EVAL_LEDOn(LED1);
-  }
-  else
-  { /* KO */
-
-    /* Turn on LED2 */
-    STM_EVAL_LEDOn(LED2);
-  }
-
-  /* Infinite loop */
-  while (1)
-  {
-  }
+	while(time--);
 }
 
-/**
-  * @brief  Configures the CAN, transmit and receive by polling
-  * @param  None
-  * @retval PASSED if the reception is well done, FAILED in other case
-  */
-TestStatus CAN_Polling(void)
+
+uint8_t CAN_Polling(void)
 {
+
+  uint8_t test = 0;
+
   CAN_InitTypeDef        CAN_InitStructure;
   CAN_FilterInitTypeDef  CAN_FilterInitStructure;
   CanTxMsg TxMessage;
@@ -110,7 +49,7 @@ TestStatus CAN_Polling(void)
 
   /* CAN register init */
   CAN_DeInit(CANx);
-  
+
   /* CAN cell init */
   CAN_InitStructure.CAN_TTCM = DISABLE;
   CAN_InitStructure.CAN_ABOM = DISABLE;
@@ -125,7 +64,8 @@ TestStatus CAN_Polling(void)
   CAN_InitStructure.CAN_BS1 = CAN_BS1_6tq;
   CAN_InitStructure.CAN_BS2 = CAN_BS2_8tq;
   CAN_InitStructure.CAN_Prescaler = 16;
-  CAN_Init(CANx, &CAN_InitStructure);
+  if( CAN_Init(CANx, &CAN_InitStructure) == CAN_InitStatus_Success )
+	  test = 1;
 
   /* CAN filter init */
 #ifdef  USE_CAN1
@@ -138,7 +78,7 @@ TestStatus CAN_Polling(void)
   CAN_FilterInitStructure.CAN_FilterIdHigh = 0x0000;
   CAN_FilterInitStructure.CAN_FilterIdLow = 0x0000;
   CAN_FilterInitStructure.CAN_FilterMaskIdHigh = 0x0000;
-  CAN_FilterInitStructure.CAN_FilterMaskIdLow = 0x0000;  
+  CAN_FilterInitStructure.CAN_FilterMaskIdLow = 0x0000;
   CAN_FilterInitStructure.CAN_FilterFIFOAssignment = 0;
 
   CAN_FilterInitStructure.CAN_FilterActivation = ENABLE;
@@ -159,6 +99,10 @@ TestStatus CAN_Polling(void)
     uwCounter++;
   }
 
+  if(CAN_TransmitStatus(CANx, TransmitMailbox)  ==  CANTXOK)
+	  test = 1;
+
+
   uwCounter = 0;
   while((CAN_MessagePending(CANx, CAN_FIFO0) < 1) && (uwCounter  !=  0xFFFF))
   {
@@ -175,55 +119,118 @@ TestStatus CAN_Polling(void)
 
   if (RxMessage.StdId != 0x11)
   {
-    return FAILED;  
+    return 0;
   }
 
   if (RxMessage.IDE != CAN_ID_STD)
   {
-    return FAILED;
+    return 0;
   }
 
   if (RxMessage.DLC != 2)
   {
-    return FAILED;  
+    return 0;
   }
 
   if ((RxMessage.Data[0]<<8|RxMessage.Data[1]) != 0xCAFE)
   {
-    return FAILED;
+    return 0;
   }
-  
-  return PASSED; /* Test Passed */
+
+
+  if ((CANx->MSR & CAN_MSR_INAK) == CAN_MSR_INAK)
+      {
+        test = CAN_InitStatus_Failed;
+      }
+      else
+      {
+        test = CAN_InitStatus_Success ;
+      }
+
+
+
+  return 1; /* Test Passed */
 }
 
-#ifdef  USE_FULL_ASSERT
 
-/**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
-void assert_failed(uint8_t* file, uint32_t line)
-{ 
-  /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+void SPIInit()
+{
+	SPI_InitTypeDef SPI_Init_St;
+	GPIO_InitTypeDef SPI_Port_Init;
 
-  /* Infinite loop */
-  while (1)
-  {
-  }
+
+
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+
+	SPI_Port_Init.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12;
+	SPI_Port_Init.GPIO_Mode = GPIO_Mode_AF;
+	SPI_Port_Init.GPIO_OType = GPIO_OType_PP;
+	SPI_Port_Init.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	SPI_Port_Init.GPIO_Speed = GPIO_Speed_25MHz;
+
+	GPIO_Init(GPIOC, &SPI_Port_Init);
+
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource10, GPIO_AF_SPI3);
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource11, GPIO_AF_SPI3);
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource12, GPIO_AF_SPI3);
+
+	SPI_Port_Init.GPIO_Pin = GPIO_Pin_13;
+	SPI_Port_Init.GPIO_Mode = GPIO_Mode_OUT;
+	SPI_Port_Init.GPIO_OType = GPIO_OType_PP;
+	SPI_Port_Init.GPIO_PuPd = GPIO_PuPd_UP;
+	SPI_Port_Init.GPIO_Speed = GPIO_Speed_25MHz;
+
+	GPIO_Init(GPIOC, &SPI_Port_Init);
+	GPIO_SetBits(GPIOC,GPIO_Pin_13);
+
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE);
+
+	SPI_Init_St.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;
+	SPI_Init_St.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
+	SPI_Init_St.SPI_Mode = SPI_Mode_Master;
+	SPI_Init_St.SPI_DataSize = SPI_DataSize_8b;
+	SPI_Init_St.SPI_FirstBit = SPI_FirstBit_MSB;
+	SPI_Init_St.SPI_CPOL - SPI_CPOL_Low;
+	SPI_Init_St.SPI_CPHA = SPI_CPHA_1Edge;
+	SPI_Init_St.SPI_NSS = SPI_NSS_Soft | SPI_NSSInternalSoft_Set;
+
+	SPI_Init(SPI3, &SPI_Init_St);
+	SPI_Cmd(SPI3, ENABLE);
+
 }
 
-#endif
+uint8_t SPI1_send(uint8_t data){
 
-/**
-  * @}
-  */
+	SPI3->DR = data; // write data to be transmitted to the SPI data register
+	while( !(SPI3->SR & SPI_I2S_FLAG_TXE) ); // wait until transmit complete
+	while( !(SPI3->SR & SPI_I2S_FLAG_RXNE) ); // wait until receive complete
+	while( SPI3->SR & SPI_I2S_FLAG_BSY ); // wait until SPI is not busy anymore
+	return SPI3->DR; // return received data from SPI data register
+}
 
-/**
-  * @}
-  */ 
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+
+int main()
+{
+	SystemInit();
+	//Init_View();
+
+	RCC_APB1PeriphClockCmd(CAN_CLK, ENABLE);
+
+	//CAN_Polling();
+
+	while(1)
+	{
+		/*
+		VCP_put_char('#');
+		VCP_put_string("Hello");
+		delay(5000000);
+		*/
+
+
+
+
+	}
+
+
+}
