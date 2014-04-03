@@ -10,9 +10,14 @@
 #include "stm32f4xx_spi.h"
 #include "interrupts.h"
 #include "view.h"
-#include "RC522.h"
+#include "mifare.h"
+#include <stdio.h>
 
 
+void _delay(uint32_t time)
+{
+	while(time--);
+}
 
 
 
@@ -29,7 +34,10 @@
 
 
 
-
+void delay(uint32_t val)
+{
+	while(val--);
+}
 
 
 
@@ -183,7 +191,7 @@ void SPIInit()
 
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE);
 
-	SPI_Init_St.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_16;
+	SPI_Init_St.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4;
 	SPI_Init_St.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
 	SPI_Init_St.SPI_Mode = SPI_Mode_Master;
 	SPI_Init_St.SPI_DataSize = SPI_DataSize_8b;
@@ -209,37 +217,53 @@ uint8_t SPI3_send(uint8_t data){
 
 */
 
+uint8_t i,tmp;
+uint8_t status;
+uint8_t str[MAX_LEN];
+uint8_t RC_size;
+uint8_t blockAddr;
+char mynum[8];
+
+
 int main()
 {
-	uint8_t data;
-	SPIInit();
 	SystemInit();
-	//Init_View();
-
-	//RCC_APB1PeriphClockCmd(CAN_CLK, ENABLE);
-
-	//CAN_Polling();
-
-
-
-	reset_dev();
-	data = 0;
-	data = get_register(0x37);
+	SPIInit();
+	MFRC522_Init();
+	Init_View();
+	int i;
 
 	while(1)
 	{
-		/*
 
-		VCP_put_char('#');
-		VCP_put_string("Hello");
-		delay(5000000);
+		tmp = Read_MFRC522(0x37);
 
-		*/
+		status = MFRC522_Request(PICC_REQIDL, str);
+		if (status == MI_OK)
+		{
+			VCP_put_string("Detected card");
+			VCP_put_string("\r\n");
+			status = MFRC522_Anticoll(str);
 
+			if(status == MI_OK)
+			{
+				sprintf(mynum,"%X %X %X %X %X", str[0],str[1],str[2],str[3],str[4]);
+				VCP_put_string(mynum);
+				VCP_put_string("\r\n");
+			}
 
+			delay(800000);
+		}
+		else
+		{
+			//VCP_put_string("No card");
+			//VCP_put_string("\r\n");
+		}
+
+		delay(800000);
 
 
 	}
 
-
+	return 0;
 }
