@@ -10,6 +10,7 @@
 #include "stm32f4xx_spi.h"
 #include "interrupts.h"
 #include "view.h"
+#include "RC522.h"
 
 
 
@@ -29,10 +30,7 @@
 
 
 
-void delay(uint32_t time)
-{
-	while(time--);
-}
+
 
 
 uint8_t CAN_Polling(void)
@@ -185,7 +183,7 @@ void SPIInit()
 
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE);
 
-	SPI_Init_St.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;
+	SPI_Init_St.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_16;
 	SPI_Init_St.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
 	SPI_Init_St.SPI_Mode = SPI_Mode_Master;
 	SPI_Init_St.SPI_DataSize = SPI_DataSize_8b;
@@ -199,7 +197,8 @@ void SPIInit()
 
 }
 
-uint8_t SPI1_send(uint8_t data){
+/*
+uint8_t SPI3_send(uint8_t data){
 
 	SPI3->DR = data; // write data to be transmitted to the SPI data register
 	while( !(SPI3->SR & SPI_I2S_FLAG_TXE) ); // wait until transmit complete
@@ -208,23 +207,33 @@ uint8_t SPI1_send(uint8_t data){
 	return SPI3->DR; // return received data from SPI data register
 }
 
-
+*/
 
 int main()
 {
+	uint8_t data;
+	SPIInit();
 	SystemInit();
 	//Init_View();
 
-	RCC_APB1PeriphClockCmd(CAN_CLK, ENABLE);
+	//RCC_APB1PeriphClockCmd(CAN_CLK, ENABLE);
 
 	//CAN_Polling();
+
+
+
+	reset_dev();
+	data = 0;
+	data = get_register(0x37);
 
 	while(1)
 	{
 		/*
+
 		VCP_put_char('#');
 		VCP_put_string("Hello");
 		delay(5000000);
+
 		*/
 
 
