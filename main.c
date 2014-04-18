@@ -45,7 +45,7 @@ uint8_t CAN_Polling(void)
 {
 
   uint8_t test = 0;
-
+  GPIO_InitTypeDef GPIO_InitStructure;
   CAN_InitTypeDef        CAN_InitStructure;
   CAN_FilterInitTypeDef  CAN_FilterInitStructure;
   CanTxMsg TxMessage;
@@ -53,9 +53,23 @@ uint8_t CAN_Polling(void)
   uint32_t uwCounter = 0;
   uint8_t TransmitMailbox = 0;
 
+  /*Port init*/
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+
+  GPIO_Init(GPIOD, &GPIO_InitStructure);
+
+  GPIO_PinAFConfig(GPIOD, GPIO_PinSource0, GPIO_AF_CAN1);
+  GPIO_PinAFConfig(GPIOD, GPIO_PinSource1, GPIO_AF_CAN1);
+
   /* CAN register init */
   CAN_DeInit(CANx);
-
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN1, ENABLE);
   /* CAN cell init */
   CAN_InitStructure.CAN_TTCM = DISABLE;
   CAN_InitStructure.CAN_ABOM = DISABLE;
@@ -63,13 +77,13 @@ uint8_t CAN_Polling(void)
   CAN_InitStructure.CAN_NART = DISABLE;
   CAN_InitStructure.CAN_RFLM = DISABLE;
   CAN_InitStructure.CAN_TXFP = DISABLE;
-  CAN_InitStructure.CAN_Mode = CAN_Mode_LoopBack;
+  CAN_InitStructure.CAN_Mode = CAN_Mode_Normal;
   CAN_InitStructure.CAN_SJW = CAN_SJW_1tq;
 
   /* CAN Baudrate = 175kbps (CAN clocked at 42 MHz) */
-  CAN_InitStructure.CAN_BS1 = CAN_BS1_6tq;
-  CAN_InitStructure.CAN_BS2 = CAN_BS2_8tq;
-  CAN_InitStructure.CAN_Prescaler = 16;
+  CAN_InitStructure.CAN_BS1 = CAN_BS1_3tq;
+  CAN_InitStructure.CAN_BS2 = CAN_BS2_4tq;
+  CAN_InitStructure.CAN_Prescaler = 12;
   if( CAN_Init(CANx, &CAN_InitStructure) == CAN_InitStatus_Success )
 	  test = 1;
 
@@ -150,7 +164,7 @@ uint8_t CAN_Polling(void)
       }
       else
       {
-        test = CAN_InitStatus_Success ;
+        test = CAN_InitStatus_Success;
       }
 
 
@@ -228,16 +242,40 @@ char mynum[8];
 int main()
 {
 	SystemInit();
-	SPIInit();
-	MFRC522_Init();
+	//SPIInit();
+	//MFRC522_Init();
 	Init_View();
 	int i;
+
+
+	CAN_Polling();
+
+	CanTxMsg TxMessage;
+
+	TxMessage.StdId = 0x11;
+	TxMessage.RTR = CAN_RTR_DATA;
+	TxMessage.IDE = CAN_ID_STD;
+	TxMessage.DLC = 6;
+	TxMessage.Data[0] = 0xCA;
+	TxMessage.Data[1] = 0xFE;
+	TxMessage.Data[2] = 0xCA;
+	TxMessage.Data[3] = 0xFE;
+	TxMessage.Data[4] = 0xCA;
+	TxMessage.Data[5] = 0xFE;
 
 	while(1)
 	{
 
-		tmp = Read_MFRC522(0x37);
+		 /* transmit */
 
+
+		  CAN_Transmit(CAN1, &TxMessage);
+		  _delay(500000);
+
+
+
+		/*
+		tmp = Read_MFRC522(0x37);
 		status = MFRC522_Request(PICC_REQIDL, str);
 		if (status == MI_OK)
 		{
@@ -261,7 +299,7 @@ int main()
 		}
 
 		delay(800000);
-
+	*/
 
 	}
 
