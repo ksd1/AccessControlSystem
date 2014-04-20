@@ -11,6 +11,7 @@
 #include "interrupts.h"
 #include "view.h"
 #include "mifare.h"
+#include "ACS_protocol.h"
 #include <stdio.h>
 
 
@@ -104,7 +105,11 @@ uint8_t CAN_Polling(void)
   CAN_FilterInitStructure.CAN_FilterActivation = ENABLE;
   CAN_FilterInit(&CAN_FilterInitStructure);
 
-  /* transmit */
+
+  /*
+
+  //transmit
+
   TxMessage.StdId = 0x11;
   TxMessage.RTR = CAN_RTR_DATA;
   TxMessage.IDE = CAN_ID_STD;
@@ -129,7 +134,7 @@ uint8_t CAN_Polling(void)
     uwCounter++;
   }
 
-  /* receive */
+  //receive
   RxMessage.StdId = 0x00;
   RxMessage.IDE = CAN_ID_STD;
   RxMessage.DLC = 0;
@@ -167,9 +172,9 @@ uint8_t CAN_Polling(void)
         test = CAN_InitStatus_Success;
       }
 
+  */
 
-
-  return 1; /* Test Passed */
+  return 1; //Test Passed
 }
 
 
@@ -236,7 +241,7 @@ uint8_t status;
 uint8_t str[MAX_LEN];
 uint8_t RC_size;
 uint8_t blockAddr;
-char mynum[8];
+char mynum[64];
 
 
 int main()
@@ -251,17 +256,17 @@ int main()
 	CAN_Polling();
 
 	CanTxMsg TxMessage;
+	CanRxMsg RxMessage;
 
 	TxMessage.StdId = 0x11;
 	TxMessage.RTR = CAN_RTR_DATA;
 	TxMessage.IDE = CAN_ID_STD;
-	TxMessage.DLC = 6;
+	TxMessage.DLC = 2;
 	TxMessage.Data[0] = 0xCA;
 	TxMessage.Data[1] = 0xFE;
-	TxMessage.Data[2] = 0xCA;
-	TxMessage.Data[3] = 0xFE;
-	TxMessage.Data[4] = 0xCA;
-	TxMessage.Data[5] = 0xFE;
+
+
+	VCP_put_string("Hello");
 
 	while(1)
 	{
@@ -269,8 +274,26 @@ int main()
 		 /* transmit */
 
 
-		  CAN_Transmit(CAN1, &TxMessage);
-		  _delay(500000);
+		  //CAN_Transmit(CAN1, &TxMessage);
+		  //_delay(300000000);
+
+		/* receive*/
+
+		if(CAN_MessagePending(CANx, CAN_FIFO0) > 0)
+		{
+			CAN_Receive(CANx,CAN_FIFO0, &RxMessage);
+
+			Display_CAN_Rx_Frame(RxMessage);
+
+			TxMessage.StdId = RxMessage.Data[1];
+			TxMessage.Data[0] = CONNECTION_ACK;
+
+			TxMessage.RTR = CAN_RTR_DATA;
+			TxMessage.IDE = CAN_ID_STD;
+			TxMessage.DLC = 1;
+
+			CAN_Transmit(CANx,&TxMessage);
+		}
 
 
 

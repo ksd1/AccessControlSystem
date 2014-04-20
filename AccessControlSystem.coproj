@@ -83,8 +83,8 @@
   <Files>
     <File name="cmsis_lib/source/stm32f4xx_gpio.c" path="cmsis_lib/source/stm32f4xx_gpio.c" type="1"/>
     <File name="usb_lib/otg/usb_regs.h" path="usb_lib/otg/usb_regs.h" type="1"/>
-    <File name="cmsis_lib/source/stm32f4xx_usart.c" path="cmsis_lib/source/stm32f4xx_usart.c" type="1"/>
     <File name="interrupts.h" path="interrupts.h" type="1"/>
+    <File name="cmsis_lib/source/stm32f4xx_usart.c" path="cmsis_lib/source/stm32f4xx_usart.c" type="1"/>
     <File name="cmsis_lib/source/stm32f4xx_can.c" path="cmsis_lib/source/stm32f4xx_can.c" type="1"/>
     <File name="view" path="" type="2"/>
     <File name="usb_lib/cdc" path="" type="2"/>
@@ -103,12 +103,12 @@
     <File name="usb_conf/usbd_conf.h" path="usb_conf/usbd_conf.h" type="1"/>
     <File name="cmsis/core_cm4.h" path="cmsis/core_cm4.h" type="1"/>
     <File name="cmsis_lib/source/misc.c" path="cmsis_lib/source/misc.c" type="1"/>
-    <File name="usb_lib/otg" path="" type="2"/>
     <File name="usb_lib/core/usbd_def.h" path="usb_lib/core/usbd_def.h" type="1"/>
+    <File name="usb_lib/otg" path="" type="2"/>
     <File name="syscalls/syscalls.c" path="syscalls/syscalls.c" type="1"/>
     <File name="usb_lib" path="" type="2"/>
-    <File name="cmsis_lib/source" path="" type="2"/>
     <File name="view/view.h" path="view/view.h" type="1"/>
+    <File name="cmsis_lib/source" path="" type="2"/>
     <File name="usb_conf/usbd_usr.c" path="usb_conf/usbd_usr.c" type="1"/>
     <File name="interrupts.c" path="interrupts.c" type="1"/>
     <File name="cmsis_boot/stm32f4xx_conf.h" path="cmsis_boot/stm32f4xx_conf.h" type="1"/>
@@ -118,15 +118,17 @@
     <File name="usb_lib/core/usbd_core.h" path="usb_lib/core/usbd_core.h" type="1"/>
     <File name="rfid_reader/mifare.h" path="rfid_reader/mifare.h" type="1"/>
     <File name="usb_lib/core/usbd_core.c" path="usb_lib/core/usbd_core.c" type="1"/>
-    <File name="cmsis_boot/startup/startup_stm32f4xx.c" path="cmsis_boot/startup/startup_stm32f4xx.c" type="1"/>
+    <File name="ACS_protocol" path="" type="2"/>
     <File name="usb_lib/core" path="" type="2"/>
+    <File name="cmsis_boot/startup/startup_stm32f4xx.c" path="cmsis_boot/startup/startup_stm32f4xx.c" type="1"/>
     <File name="cmsis_lib/source/stm32f4xx_rcc.c" path="cmsis_lib/source/stm32f4xx_rcc.c" type="1"/>
     <File name="usb_conf" path="" type="2"/>
     <File name="usb_conf/usb_conf.h" path="usb_conf/usb_conf.h" type="1"/>
     <File name="cmsis/core_cmInstr.h" path="cmsis/core_cmInstr.h" type="1"/>
     <File name="usb_lib/otg/usb_core.c" path="usb_lib/otg/usb_core.c" type="1"/>
-    <File name="usb_lib/otg/usb_dcd.h" path="usb_lib/otg/usb_dcd.h" type="1"/>
     <File name="usb_lib/core/usbd_ioreq.c" path="usb_lib/core/usbd_ioreq.c" type="1"/>
+    <File name="usb_lib/otg/usb_dcd.h" path="usb_lib/otg/usb_dcd.h" type="1"/>
+    <File name="ACS_protocol/ACS_Protocol.c" path="ACS_protocol/ACS_Protocol.c" type="1"/>
     <File name="usb_lib/cdc/usbd_cdc_core.c" path="usb_lib/cdc/usbd_cdc_core.c" type="1"/>
     <File name="usb_conf/usbd_desc.h" path="usb_conf/usbd_desc.h" type="1"/>
     <File name="view/view.c" path="view/view.c" type="1"/>
@@ -136,22 +138,23 @@
     <File name="cmsis_boot/system_stm32f4xx.c" path="cmsis_boot/system_stm32f4xx.c" type="1"/>
     <File name="cmsis_lib/include/stm32f4xx_spi.h" path="cmsis_lib/include/stm32f4xx_spi.h" type="1"/>
     <File name="usb_lib/core/usbd_usr.h" path="usb_lib/core/usbd_usr.h" type="1"/>
+    <File name="ACS_protocol/ACS_Protocol.h" path="ACS_protocol/ACS_Protocol.h" type="1"/>
     <File name="cmsis" path="" type="2"/>
-    <File name="rfid_reader/mifare.c" path="rfid_reader/mifare.c" type="1"/>
     <File name="cmsis_lib" path="" type="2"/>
+    <File name="rfid_reader/mifare.c" path="rfid_reader/mifare.c" type="1"/>
     <File name="usb_lib/core/usbd_req.h" path="usb_lib/core/usbd_req.h" type="1"/>
     <File name="cmsis_lib/include/stm32f4xx_gpio.h" path="cmsis_lib/include/stm32f4xx_gpio.h" type="1"/>
     <File name="usb_lib/otg/usb_core.h" path="usb_lib/otg/usb_core.h" type="1"/>
-    <File name="usb_lib/otg/usb_dcd.c" path="usb_lib/otg/usb_dcd.c" type="1"/>
-    <File name="cmsis_lib/include/stm32f4xx_can.h" path="cmsis_lib/include/stm32f4xx_can.h" type="1"/>
-    <File name="syscalls" path="" type="2"/>
     <File name="usb_lib/core/usbd_ioreq.h" path="usb_lib/core/usbd_ioreq.h" type="1"/>
+    <File name="syscalls" path="" type="2"/>
+    <File name="cmsis_lib/include/stm32f4xx_can.h" path="cmsis_lib/include/stm32f4xx_can.h" type="1"/>
+    <File name="usb_lib/otg/usb_dcd.c" path="usb_lib/otg/usb_dcd.c" type="1"/>
     <File name="cmsis_lib/include/misc.h" path="cmsis_lib/include/misc.h" type="1"/>
     <File name="cmsis_lib/include" path="" type="2"/>
     <File name="usb_conf/usbd_desc.c" path="usb_conf/usbd_desc.c" type="1"/>
     <File name="usb_lib/cdc/usbd_cdc_core.h" path="usb_lib/cdc/usbd_cdc_core.h" type="1"/>
-    <File name="main.c" path="main.c" type="1"/>
-    <File name="rfid_reader" path="" type="2"/>
     <File name="usb_lib/cdc/usbd_cdc_vcp.h" path="usb_lib/cdc/usbd_cdc_vcp.h" type="1"/>
+    <File name="rfid_reader" path="" type="2"/>
+    <File name="main.c" path="main.c" type="1"/>
   </Files>
 </Project>

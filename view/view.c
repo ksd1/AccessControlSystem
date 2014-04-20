@@ -45,9 +45,47 @@ void Init_USB()
 
 
 void VCP_put_string(char* string)
-  {
+ {
  	 while(*string)
  	 {
  		VCP_put_char(*string++);
  	 }
-  }
+ }
+
+void Display_CAN_Rx_Frame(CanRxMsg RxMessage)
+{
+	char buffer[32];
+	uint8_t i;
+
+	VCP_put_string("------ RxFrame Begin ------");
+	VCP_put_string("\r\n");
+
+	sprintf(buffer,"Std. Ident: %X", RxMessage.StdId);
+	VCP_put_string(buffer);
+	VCP_put_string("\r\n");
+
+	if(RxMessage.RTR == CAN_RTR_DATA)
+	{
+		VCP_put_string("Remote Trans: NO");
+		VCP_put_string("\r\n");
+	}
+	else
+	{
+		VCP_put_string("Remote Trans: YES");
+		VCP_put_string("\r\n");
+	}
+
+	sprintf(buffer,"Data Length: %d", RxMessage.DLC);
+	VCP_put_string(buffer);
+	VCP_put_string("\r\n");
+
+	for(i=0; i<RxMessage.DLC; i++)
+	{
+		sprintf(buffer,"Data %d: %X", i, RxMessage.Data[i]);
+		VCP_put_string(buffer);
+		VCP_put_string("\r\n");
+	}
+
+	VCP_put_string("------- RxFrame End -------");
+	VCP_put_string("\r\n");
+}

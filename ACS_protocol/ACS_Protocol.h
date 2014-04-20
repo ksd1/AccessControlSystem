@@ -5,14 +5,22 @@
  *  Author: Krzysztof Antosz
  */ 
 
+#include "stm32f4xx.h"
+#include <stdlib.h>
+
+typedef struct
+{
+	uint8_t DeviceID;
+	uint8_t DeviceType;
+	void* AttachDevices;
+	void* next;
+	void* prev;
+
+}DeviceStruct;
 
 
 #ifndef ACS_PROTOCOL_H_
 #define ACS_PROTOCOL_H_
-
-#include "CAN_Lib.h"
-#include <stdint.h>
-#include <util/delay.h>
 
 #define TIMEOUT 10000
 //Device ID
@@ -34,9 +42,9 @@
 #define LOCK 0xD2
 
 
-uint8_t ACS_ConnectToSystem();
+void ACS_Init();
+uint8_t ACS_AddDevice(uint8_t ID, uint8_t Type);
 
-
-uint8_t ACS_NoConnectionACK_ErrorHandler();;
+//uint8_t ACS_NoConnectionACK_ErrorHandler();;
 
 #endif /* ACS_PROTOCOL_H_ */
