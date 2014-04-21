@@ -89,3 +89,68 @@ void Display_CAN_Rx_Frame(CanRxMsg RxMessage)
 	VCP_put_string("------- RxFrame End -------");
 	VCP_put_string("\r\n");
 }
+
+
+void DisplayDevicesList(DeviceStruct* DV_Head)
+{
+	DeviceStruct* DV_Temp1 = DV_Head;
+	uint8_t i;
+	char buffer[32];
+
+	VCP_put_string("------- Devices List --------");
+	VCP_put_string("\r\n");
+	if(DV_Temp1 == NULL)
+	{
+		VCP_put_string("No devices connected");
+		VCP_put_string("\r\n");
+		return;
+	}
+
+
+	while(DV_Temp1 != NULL)
+	{
+		sprintf(buffer,"Device ID: %X", DV_Temp1->DeviceID);
+		VCP_put_string(buffer);
+		VCP_put_string("\r\n");
+
+
+		if( (DV_Temp1->DeviceType & 0xF0)==0xB0 || (DV_Temp1->DeviceType & 0xF0)==0xC0 ) //Requester = 0xBX - 0xCX
+		{
+			sprintf(buffer,"Device Type: %X (Requester)", DV_Temp1->DeviceType);
+			VCP_put_string(buffer);
+			VCP_put_string("\r\n");
+
+			VCP_put_string("Attached Devices: ");
+
+
+			for(i=0; i<5; i++)
+			{
+				sprintf(buffer,"%X, ", DV_Temp1->AttachDevices[i]);
+				VCP_put_string(buffer);
+			}
+		}
+		else //Executor - no attached deviced
+		{
+			sprintf(buffer,"Device Type: %X (Executor)", DV_Temp1->DeviceType);
+			VCP_put_string(buffer);
+			VCP_put_string("\r\n");
+
+			VCP_put_string("Attached Devices: ");
+
+			VCP_put_string("N/A");
+		}
+		VCP_put_string("\r\n");
+
+		VCP_put_string("-----------------------------");
+		VCP_put_string("\r\n");
+
+		DV_Temp1 = (DeviceStruct*)DV_Temp1->next;
+	}
+
+
+
+}
+
+
+
+

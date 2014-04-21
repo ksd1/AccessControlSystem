@@ -10,12 +10,14 @@
 #include "usbd_cdc_vcp.h"
 #include "usb_dcd_int.h"
 
+#include "ACS_protocol.h"
+
 
 uint8_t Init_View(void);
 void Init_USB();
 void VCP_put_string(char* string);
 void Display_CAN_Rx_Frame(CanRxMsg);
-
+void DisplayDevicesList(DeviceStruct* DV_Head);
 
 
 #endif

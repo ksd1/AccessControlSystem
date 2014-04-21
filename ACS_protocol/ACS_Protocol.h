@@ -5,22 +5,26 @@
  *  Author: Krzysztof Antosz
  */ 
 
+#ifndef ACS_PROTOCOL_H_
+#define ACS_PROTOCOL_H_
+
+
 #include "stm32f4xx.h"
+#include "stm32f4xx_can.h"
 #include <stdlib.h>
 
 typedef struct
 {
 	uint8_t DeviceID;
 	uint8_t DeviceType;
-	void* AttachDevices;
+	uint8_t* AttachDevices;
 	void* next;
 	void* prev;
 
 }DeviceStruct;
 
 
-#ifndef ACS_PROTOCOL_H_
-#define ACS_PROTOCOL_H_
+
 
 #define TIMEOUT 10000
 //Device ID
@@ -33,18 +37,19 @@ typedef struct
 #define CONNECTION_ACK 0xF3
 
 //Types of Devices
-//Requester
+//Requester = 0xBX - 0xCX
 #define SWITCH 0xB1
 #define AUTHENTICATOR 0xB2
 
-//Executor
+//Executor 0xDX - 0xEX
 #define LIGHT 0xD1
 #define LOCK 0xD2
 
 
 void ACS_Init();
-uint8_t ACS_AddDevice(uint8_t ID, uint8_t Type);
-
+int8_t ACS_AddDevice(uint8_t ID, uint8_t Type);
+int8_t ACS_ConnectDevice(CanRxMsg RxMessage);
+int8_t ACS_MergeDevices(uint8_t RequesterID, uint8_t ExecutorID, uint8_t Action);
 //uint8_t ACS_NoConnectionACK_ErrorHandler();;
 
 #endif /* ACS_PROTOCOL_H_ */

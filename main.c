@@ -241,8 +241,8 @@ uint8_t status;
 uint8_t str[MAX_LEN];
 uint8_t RC_size;
 uint8_t blockAddr;
-char mynum[64];
-
+char buffer[64];
+char znak;
 
 int main()
 {
@@ -250,7 +250,7 @@ int main()
 	//SPIInit();
 	//MFRC522_Init();
 	Init_View();
-	int i;
+
 
 
 	CAN_Polling();
@@ -268,34 +268,38 @@ int main()
 
 	VCP_put_string("Hello");
 
+
+	//Sample Devices;
+	ACS_AddDevice(1, 0xD1);
+	ACS_AddDevice(2, 0xB2);
+	ACS_AddDevice(3, 0xc2);
+
 	while(1)
 	{
-
-		 /* transmit */
-
-
-		  //CAN_Transmit(CAN1, &TxMessage);
-		  //_delay(300000000);
-
-		/* receive*/
 
 		if(CAN_MessagePending(CANx, CAN_FIFO0) > 0)
 		{
 			CAN_Receive(CANx,CAN_FIFO0, &RxMessage);
-
 			Display_CAN_Rx_Frame(RxMessage);
 
-			TxMessage.StdId = RxMessage.Data[1];
-			TxMessage.Data[0] = CONNECTION_ACK;
+			switch(RxMessage.Data[0])	//Data[0] -> Command
+			{
+				case CONNECT_DEVICE:	ACS_ConnectDevice(RxMessage);
+					break;
+			}
 
-			TxMessage.RTR = CAN_RTR_DATA;
-			TxMessage.IDE = CAN_ID_STD;
-			TxMessage.DLC = 1;
-
-			CAN_Transmit(CANx,&TxMessage);
 		}
 
 
+		if(VCP_get_string(buffer))
+		{
+			VCP_put_string("Odebrano");
+			VCP_put_string("\r\n");
+			VCP_put_string(buffer);
+			VCP_put_string("\r\n");
+			DisplayDevicesList(ACS_GetDeviceListPointer());
+
+		}
 
 		/*
 		tmp = Read_MFRC522(0x37);
