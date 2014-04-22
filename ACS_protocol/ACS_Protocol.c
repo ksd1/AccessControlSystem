@@ -1,7 +1,9 @@
 #include "ACS_Protocol.h"
 
 DeviceStruct *DV_Head = NULL;
-
+UserStruct* USR_Head = NULL;
+LockStruct* LOCK_Head = NULL;
+uint8_t UserIdConuter = 1;
 
 void ACS_Init()
 {
@@ -155,3 +157,160 @@ uint8_t ACS_IsExecutor(uint8_t DevType)
 	else
 		return 0;
 }
+
+int8_t ACS_AddUser(char* cName, char* cFormane, uint8_t* cCardID)
+{
+	UserStruct* DV_Temp1;
+	UserStruct* DV_Temp2;
+	uint8_t i;
+
+	if (USR_Head == NULL)
+	{
+		USR_Head = (UserStruct*)malloc(sizeof(UserStruct));
+
+		if(USR_Head == NULL)
+			return -1;
+
+		USR_Head->ID = UserIdConuter++;
+		strcpy(USR_Head->Name,cName);
+		strcpy(USR_Head->Formane, cFormane);
+		strcpy(USR_Head->CardID, cCardID);
+		USR_Head->next = NULL;
+	}
+	else
+	{
+		DV_Temp1 = USR_Head;
+
+		while (DV_Temp1->next != NULL)
+			DV_Temp1 = (UserStruct*)DV_Temp1->next;
+
+		DV_Temp2 = (UserStruct*)malloc(sizeof(UserStruct));
+
+		if(DV_Temp2 == NULL)
+			return -1;
+
+		DV_Temp2->ID = UserIdConuter++;
+		strcpy(DV_Temp2->Name,cName);
+		strcpy(DV_Temp2->Formane, cFormane);
+		strcpy(DV_Temp2->CardID, cCardID);
+
+		DV_Temp2->next = NULL;
+
+		DV_Temp1->next = DV_Temp2;
+	}
+
+	return 1;
+
+}
+
+int8_t ACS_AddLock(uint8_t DevID)
+{
+	LockStruct* DV_Temp1;
+	LockStruct* DV_Temp2;
+	uint8_t i;
+
+	if (LOCK_Head == NULL)
+	{
+		LOCK_Head = (LockStruct*)malloc(sizeof(LockStruct));
+
+		if(LOCK_Head == NULL)
+			return -1;
+
+		LOCK_Head->DeviceID = DevID;
+		LOCK_Head->AttachUsersCounter = 0;
+		LOCK_Head->next = NULL;
+
+		for(i=0; i<10; i++)
+			LOCK_Head->AttachUsers[i] = NULL;
+	}
+	else
+	{
+		DV_Temp1 = LOCK_Head;
+
+		while (DV_Temp1->next != NULL)
+			DV_Temp1 = (LockStruct*)DV_Temp1->next;
+
+		DV_Temp2 = (LockStruct*)malloc(sizeof(LockStruct));
+
+		if(DV_Temp2 == NULL)
+			return -1;
+
+		DV_Temp2->DeviceID = DevID;
+		DV_Temp2->next = NULL;
+		DV_Temp2->AttachUsersCounter = 0;
+		for(i=0; i<10; i++)
+			DV_Temp2->AttachUsers[i] = NULL;
+
+		DV_Temp1->next = DV_Temp2;
+	}
+
+	return 1;
+}
+
+uint8_t ACS_IdCmp(uint8_t* CardID1, uint8_t* CardID2)
+{
+	uint8_t i;
+
+	for(i=0; i<4; i++)
+	{
+		if( *(CardID1+i) != *(CardID2+i) )
+			return -1;
+	}
+	return 0;
+}
+
+uint8_t ACS_GetUserID(uint8_t CardID[4])
+{
+	UserStruct* DV_Temp1 = USR_Head;
+
+	while(DV_Temp1 != NULL && ACS_IdCmp(DV_Temp1->CardID,CardID) != 0)
+		DV_Temp1 = (UserStruct*)DV_Temp1->next;
+
+	if(DV_Temp1 != NULL)
+		return DV_Temp1->ID;
+	else
+		return 0;
+
+}
+
+uint8_t ACS_UsrToLock(uint8_t UsrID, uint8_t LockId)
+{
+	LockStruct* LOCK_Temp1 = LOCK_Head;
+	UserStruct* USR_Temp1 = USR_Head;
+
+	while(LOCK_Temp1 != NULL && LOCK_Temp1->DeviceID != LockId)
+		LOCK_Temp1 = LOCK_Temp1->next;
+
+	if(LOCK_Temp1 == NULL)
+		return -1;
+
+	while(USR_Temp1 != NULL && USR_Temp1->ID != UsrID)
+		USR_Temp1 = USR_Temp1->next;
+
+	if(USR_Temp1 == NULL)
+		return -1;
+
+	LOCK_Temp1->AttachUsers[LOCK_Temp1->AttachUsersCounter++] = USR_Temp1;
+}
+
+uint8_t ACS_AllowToOpen(uint8_t UsrID, uint8_t LockId)
+{
+	LockStruct* LOCK_Temp1 = LOCK_Head;
+	UserStruct* USR_Temp1 = USR_Head;
+	uint8_t i;
+
+	while(LOCK_Temp1 != NULL && LOCK_Temp1->DeviceID != LockId)
+		LOCK_Temp1 = LOCK_Temp1->next;
+
+	if(LOCK_Temp1 == NULL)
+		return -1;
+
+	for(i=0; i<LOCK_Temp1->AttachUsersCounter; i++)
+	{
+		if(LOCK_Temp1->AttachUsers[i]->ID == UsrID)
+			return 1;
+	}
+
+	return -1;
+}
+

@@ -24,6 +24,27 @@ typedef struct
 
 }DeviceStruct;
 
+typedef struct
+{
+	uint8_t ID;
+	char Name[20];
+	char Formane[30];
+	char CardID[4];
+	void* next;
+
+}UserStruct;
+
+typedef struct
+{
+	uint8_t DeviceID;
+	UserStruct* AttachUsers[10];
+	uint8_t AttachUsersCounter;
+	void* next;
+	void* prev;
+
+}LockStruct;
+
+
 
 
 
@@ -56,5 +77,10 @@ int8_t ACS_MergeDevices(uint8_t RequesterID, uint8_t ExecutorID, uint8_t Action)
 uint8_t ACS_IsRequster(uint8_t DevId);
 uint8_t ACS_IsExecutor(uint8_t DevId);
 //uint8_t ACS_NoConnectionACK_ErrorHandler();;
-
+int8_t ACS_AddUser(char* cName, char* cFormane, uint8_t* CardID);
+int8_t ACS_AddLock(uint8_t DevID);
+uint8_t ACS_GetUserID(uint8_t* CardID);
+uint8_t ACS_IdCmp(uint8_t* CardID1, uint8_t* CardID2);
+uint8_t ACS_UsrToLock(uint8_t UsrID, uint8_t LockId);
+uint8_t ACS_AllowToOpen(uint8_t UsrID, uint8_t LockId);
 #endif /* ACS_PROTOCOL_H_ */

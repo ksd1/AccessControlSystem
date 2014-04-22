@@ -245,7 +245,8 @@ uint8_t RC_size;
 uint8_t blockAddr;
 char buffer[64];
 char znak;
-
+char keyTab[4] = {0x01, 0x02, 0x03, 0x04};
+char keyTab2[4] = {0x01, 0x02, 0x03, 0x05};
 int main()
 {
 	SystemInit();
@@ -272,9 +273,16 @@ int main()
 
 
 	//Sample Devices;
-	ACS_AddDevice(1, 0xD1);
-	ACS_AddDevice(2, 0xB2);
-	ACS_AddDevice(3, 0xc2);
+
+	ACS_AddUser("Jan","Kowalski",keyTab);
+	ACS_AddUser("Piotr","Nowak",keyTab);
+	ACS_AddUser("Jacek","Kviat", keyTab2);
+
+	znak = ACS_GetUserID(keyTab2);
+	ACS_AddLock(0x02);
+	ACS_AddLock(0x03);
+
+	ACS_UsrToLock(2,0x03);
 
 	while(1)
 	{
