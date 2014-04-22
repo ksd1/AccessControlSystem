@@ -34,6 +34,7 @@ int8_t ACS_AddDevice(uint8_t ID, uint8_t Type)
 		else
 			DV_Head->AttachDevices = NULL;
 
+		DV_Head->AttachDevicesCounter = 0;
 		DV_Head->next = NULL;
 		DV_Head->prev = NULL;
 	}
@@ -61,6 +62,7 @@ int8_t ACS_AddDevice(uint8_t ID, uint8_t Type)
 		else
 			DV_Temp2->AttachDevices = NULL;
 
+		DV_Temp2->AttachDevicesCounter = 0;
 		DV_Temp2->next = NULL;
 		DV_Temp2->prev = NULL;
 
@@ -97,9 +99,59 @@ int8_t ACS_ConnectDevice(CanRxMsg RxMessage)
 int8_t ACS_MergeDevices(uint8_t RequesterID, uint8_t ExecutorID, uint8_t Action)
 {
 
+	DeviceStruct* DV_Temp1 = DV_Head;
+	DeviceStruct* DV_Temp2 = DV_Head;
+	while((DV_Temp1->DeviceID != RequesterID) && (DV_Temp1 != NULL))
+	{
+		if(DV_Temp1 == NULL)
+		{
+			return -1;
+		}
+
+		DV_Temp1 = (DeviceStruct*)DV_Temp1->next;
+	}
+
+	if(!ACS_IsRequster(DV_Temp1->DeviceType))
+		return -2;
+
+	while((DV_Temp2->DeviceID != ExecutorID) && (DV_Temp2 != NULL))
+	{
+		if(DV_Temp2 == NULL)
+		{
+			return -1;
+		}
+
+		DV_Temp2 = (DeviceStruct*)DV_Temp2->next;
+	}
+
+	if(!ACS_IsExecutor(DV_Temp2->DeviceType))
+		return -2;
 
 
+	if(DV_Temp1->AttachDevicesCounter < 5)
+	{
+		*(DV_Temp1->AttachDevices + DV_Temp1->AttachDevicesCounter) = ExecutorID;
+		DV_Temp1->AttachDevicesCounter++;
+		return 1;
+	}
+	else
+	{
+		return -2;
+	}
 
-	return 0;
+}
 
+uint8_t ACS_IsRequster(uint8_t DevType)
+{
+	if( (DevType & 0xF0)==0xB0 || (DevType & 0xF0)==0xC0 )
+		return 1;
+	else
+		return 0;
+}
+uint8_t ACS_IsExecutor(uint8_t DevType)
+{
+	if( (DevType & 0xF0)==0xD0 || (DevType & 0xF0)==0xE0 )
+		return 1;
+	else
+		return 0;
 }

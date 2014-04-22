@@ -18,6 +18,6 @@ void Init_USB();
 void VCP_put_string(char* string);
 void Display_CAN_Rx_Frame(CanRxMsg);
 void DisplayDevicesList(DeviceStruct* DV_Head);
-
+void DisplayMergeDevice();
 
 #endif

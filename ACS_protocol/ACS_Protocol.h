@@ -18,6 +18,7 @@ typedef struct
 	uint8_t DeviceID;
 	uint8_t DeviceType;
 	uint8_t* AttachDevices;
+	uint8_t AttachDevicesCounter;
 	void* next;
 	void* prev;
 
@@ -36,6 +37,8 @@ typedef struct
 #define CONNECT_DEVICE 0xF1
 #define CONNECTION_ACK 0xF3
 
+#define EXECUTE_ACTION 0xA0
+
 //Types of Devices
 //Requester = 0xBX - 0xCX
 #define SWITCH 0xB1
@@ -50,6 +53,8 @@ void ACS_Init();
 int8_t ACS_AddDevice(uint8_t ID, uint8_t Type);
 int8_t ACS_ConnectDevice(CanRxMsg RxMessage);
 int8_t ACS_MergeDevices(uint8_t RequesterID, uint8_t ExecutorID, uint8_t Action);
+uint8_t ACS_IsRequster(uint8_t DevId);
+uint8_t ACS_IsExecutor(uint8_t DevId);
 //uint8_t ACS_NoConnectionACK_ErrorHandler();;
 
 #endif /* ACS_PROTOCOL_H_ */

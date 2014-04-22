@@ -13,6 +13,8 @@
 #include "mifare.h"
 #include "ACS_protocol.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 
 void _delay(uint32_t time)
@@ -276,6 +278,7 @@ int main()
 
 	while(1)
 	{
+		//ACS_MergeDevices(2,1,0);
 
 		if(CAN_MessagePending(CANx, CAN_FIFO0) > 0)
 		{
@@ -297,7 +300,14 @@ int main()
 			VCP_put_string("\r\n");
 			VCP_put_string(buffer);
 			VCP_put_string("\r\n");
-			DisplayDevicesList(ACS_GetDeviceListPointer());
+
+			if(!strcmp(buffer,"devlist"))
+				DisplayDevicesList(ACS_GetDeviceListPointer());
+			else if(!strcmp(buffer,"merge"))
+				DisplayMergeDevice();
+			else
+				VCP_put_string("No Command \r\n");
+
 
 		}
 

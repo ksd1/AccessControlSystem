@@ -125,7 +125,7 @@ void DisplayDevicesList(DeviceStruct* DV_Head)
 
 			for(i=0; i<5; i++)
 			{
-				sprintf(buffer,"%X, ", DV_Temp1->AttachDevices[i]);
+				sprintf(buffer,"%X, ", *(DV_Temp1->AttachDevices+i));
 				VCP_put_string(buffer);
 			}
 		}
@@ -147,6 +147,37 @@ void DisplayDevicesList(DeviceStruct* DV_Head)
 		DV_Temp1 = (DeviceStruct*)DV_Temp1->next;
 	}
 
+}
+
+void DisplayMergeDevice()
+{
+	int8_t buffer[8];
+	int8_t ReqID;
+	int8_t ExecID;
+
+	VCP_put_string("------ Merge ------ \r\n");
+	VCP_put_string("Requster ID: ");
+	while(!VCP_get_string(buffer));
+	ReqID = atoi(buffer);
+	VCP_put_string(buffer);
+	VCP_put_string("\r\n");
+
+	VCP_put_string("Executor ID: ");
+	while(!VCP_get_string(buffer));
+	ExecID = atoi(buffer);
+	VCP_put_string(buffer);
+	VCP_put_string("\r\n");
+
+	if(ACS_MergeDevices(ReqID, ExecID, 0)>0)
+	{
+		VCP_put_string("Success");
+		VCP_put_string("\r\n");
+	}
+	else
+	{
+		VCP_put_string("Error");
+		VCP_put_string("\r\n");
+	}
 
 
 }
