@@ -284,6 +284,9 @@ int main()
 
 	ACS_UsrToLock(2,0x03);
 
+	znak = ACS_AllowToOpen(2,0x03);
+	znak = ACS_AllowToOpen(2,0x02);
+
 	while(1)
 	{
 		//ACS_MergeDevices(2,1,0);
